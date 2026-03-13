@@ -1,0 +1,93 @@
+# Reusable workflow: run tests from app repo. Lives in poc-app-repo; checkout runs in test repo (cli-test-automation-poc).
+name: Run tests from app
+
+on:
+  workflow_call:
+    inputs:
+      source_repo:
+        required: true
+        type: string
+      source_event:
+        required: true
+        type: string
+      ref:
+        required: true
+        type: string
+      sha:
+        required: true
+        type: string
+      pr_number:
+        required: false
+        type: string
+        default: ""
+      sender:
+        required: false
+        type: string
+        default: ""
+      # Repository to checkout (where test code lives). Caller can override.
+      repository:
+        required: false
+        type: string
+        default: "test-reports/cli-test-automation-poc"
+    secrets:
+      # Token with read access to the repository above (for checkout). Required if repo is private.
+      repo_access_token:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - name: Triggering CLI tests in test repo
+        run: |
+          echo "::notice::Triggering CLI tests in test repo"
+          echo "Test repo (checkout): ${{ inputs.repository }}"
+          echo "Source (trigger): ${{ inputs.source_repo }} | event: ${{ inputs.source_event }} | ref: ${{ inputs.ref }}"
+
+      - name: Log trigger context
+        run: |
+          echo "::group::Trigger context (from app repo)"
+          echo "source_repo: ${{ inputs.source_repo }}"
+          echo "source_event: ${{ inputs.source_event }}"
+          echo "ref: ${{ inputs.ref }}"
+          echo "sha: ${{ inputs.sha }}"
+          echo "pr_number: ${{ inputs.pr_number }}"
+          echo "sender: ${{ inputs.sender }}"
+          echo "::endgroup::"
+
+      - name: Checkout test repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repository }}
+          ref: main
+          token: ${{ secrets.repo_access_token }}
+
+      - name: Create venv and install dependencies
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          echo "::notice::Executing tests from ${{ inputs.source_repo }}"
+          mkdir -p reports
+          .venv/bin/pytest -v --tb=short --html=reports/report.html --self-contained-html
+
+      - name: Generate CLI dashboard HTML
+        run: |
+          echo "::notice::Generating CLI dashboard from pytest HTML report"
+          .venv/bin/python -m utils.cli_dashboard \
+            --report-path reports/report.html \
+            --output-dir dashboard
+
+      - name: Log dashboard URL
+        run: |
+          OWNER="${{ github.repository_owner }}"
+          REPO="cli-test-automation-poc"
+          BRANCH="test-dashboard"
+          echo "::notice::Dashboard is published via GitHub Pages (test-dashboard setup)."
+          echo "Dashboard URL (project site): https://${OWNER}.github.io/${REPO}/"
+          echo "Dashboard URL (branch-specific path): https://${OWNER}.github.io/${REPO}/${BRANCH}/"
