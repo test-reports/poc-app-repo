@@ -70,11 +70,11 @@ jobs:
           python3 -m venv .venv
           .venv/bin/pip install -r requirements.txt
 
-      - name: Run tests
+      - name: Run smoke tests
         run: |
-          echo "::notice::Executing tests from ${{ inputs.source_repo }}"
+          echo "::notice::Executing smoke tests from ${{ inputs.source_repo }}"
           mkdir -p reports
-          .venv/bin/pytest -v --tb=short --junitxml=reports/junit.xml
+          .venv/bin/pytest -v --tb=short -m smoke --junitxml=reports/junit.xml
 
       - name: Generate CLI HTML dashboard
         if: always()
@@ -109,7 +109,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No dashboard changes to commit."
           else
-            git commit -m "Update CLI dashboard for run ${GITHUB_RUN_ID}"
+            git commit -m "Update CLI dashboard (smoke) for run ${GITHUB_RUN_ID}"
             git push origin "${DASHBOARD_BRANCH}"
           fi
       - name: Write CLI test dashboard summary
@@ -140,7 +140,7 @@ jobs:
           pages_url = f"https://{owner}.github.io/cli-test-automation-poc/" if owner else ""
 
           lines = []
-          lines.append("### CLI test dashboard summary (test repo)")
+          lines.append("### CLI test dashboard summary (smoke, from app repo)")
           lines.append("")
           lines.append(f"- **Total tests**: {total}")
           lines.append(f"- **Passed**: {passed}")
@@ -154,7 +154,7 @@ jobs:
               lines.append("")
               lines.append(f"- **GitHub Pages dashboard (test repo)**: {pages_url}")
           lines.append("")
-          lines.append("_Rendered from `reports/report.html` in the test repo._")
+          lines.append("_Smoke tests only. Rendered from `reports/junit.xml` in the test repo._")
 
           summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
           if summary_path:
