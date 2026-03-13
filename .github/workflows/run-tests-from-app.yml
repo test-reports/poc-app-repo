@@ -76,18 +76,18 @@ jobs:
           mkdir -p reports
           .venv/bin/pytest -v --tb=short --html=reports/report.html --self-contained-html
 
-      - name: Generate CLI dashboard HTML
-        run: |
-          echo "::notice::Generating CLI dashboard from pytest HTML report"
-          .venv/bin/python -m utils.cli_dashboard \
-            --report-path reports/report.html \
-            --output-dir dashboard
-
       - name: Log dashboard URL
         run: |
           OWNER="${{ github.repository_owner }}"
-          REPO="cli-test-automation-poc"
-          BRANCH="test-dashboard"
-          echo "::notice::Dashboard is published via GitHub Pages (test-dashboard setup)."
-          echo "Dashboard URL (project site): https://${OWNER}.github.io/${REPO}/"
-          echo "Dashboard URL (branch-specific path): https://${OWNER}.github.io/${REPO}/${BRANCH}/"
+          TEST_REPO="cli-test-automation-poc"
+          BASE_URL="https://${OWNER}.github.io/${TEST_REPO}"
+
+          echo "::notice::CLI test dashboard (latest): ${BASE_URL}/"
+          echo "::notice::CLI test dashboard (test-dashboard branch): ${BASE_URL}/test-dashboard/"
+
+          {
+            echo "### CLI test dashboard";
+            echo "";
+            echo "- Latest dashboard: ${BASE_URL}/";
+            echo "- Test-dashboard branch: ${BASE_URL}/test-dashboard/";
+          } >> "$GITHUB_STEP_SUMMARY"
