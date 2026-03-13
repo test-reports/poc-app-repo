@@ -19,7 +19,7 @@ jobs:
   run-tests:
     needs: trigger-local
     if: github.event_name != 'repository_dispatch'
-    uses: test-reports/cli-test-automation-poc/.github/workflows/run-tests-reusable.yml@main
+    uses: test-reports/cli-test-automation-poc/.github/workflows/run-tests-from-app.yml@main
     with:
       source_repo: ${{ github.repository }}
       source_event: ${{ github.event_name }}
@@ -29,4 +29,3 @@ jobs:
       sender: ${{ github.actor }}
     secrets:
       repo_access_token: ${{ secrets.REPO_DISPATCH_TOKEN }}
-      rp_api_key: ${{ secrets.RP_API_KEY }}

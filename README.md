@@ -4,7 +4,7 @@ Dummy repository for triggering workflows. On **push** or **pull_request** to `m
 
 ## Setup
 
-1. **Target repo**: **cli-test-automation-poc** must exist and contain the reusable workflow `.github/workflows/run-tests-reusable.yml` on its default branch (e.g. `main`).
+1. **Target repo**: **cli-test-automation-poc** must exist and contain the reusable workflow `.github/workflows/run-tests-from-app.yml` on its default branch (e.g. `main`).
 
 2. **Secrets in this repo**:
    - **`REPO_DISPATCH_TOKEN`**: PAT with read access to **cli-test-automation-poc** (for checkout in the called workflow).
@@ -19,7 +19,7 @@ Dummy repository for triggering workflows. On **push** or **pull_request** to `m
 |------|--------|--------|
 | REPO_DISPATCH_TOKEN | This repo → Settings → Actions → Secrets | Read access to **cli-test-automation-poc** (for checkout). |
 | RP_API_KEY (optional) | This repo → Settings → Actions → Secrets | Report Portal API key; when set, tests report to RP. |
-| Reusable workflow | **cli-test-automation-poc** | `run-tests-reusable.yml` on default branch |
+| Reusable workflow | **cli-test-automation-poc** | `run-tests-from-app.yml` on default branch |
 | Access (private test repo) | **cli-test-automation-poc** → Settings → Actions | Allow this repo to use its workflows |
 
 ## Usage
