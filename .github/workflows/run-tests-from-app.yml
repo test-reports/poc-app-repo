@@ -75,19 +75,54 @@ jobs:
           echo "::notice::Executing tests from ${{ inputs.source_repo }}"
           mkdir -p reports
           .venv/bin/pytest -v --tb=short --html=reports/report.html --self-contained-html
-
-      - name: Generate CLI dashboard HTML
+      - name: Write CLI test dashboard summary
         run: |
-          echo "::notice::Generating CLI dashboard from pytest HTML report"
-          .venv/bin/python -m utils.cli_dashboard \
-            --report-path reports/report.html \
-            --output-dir dashboard
+          python - << 'PY'
+          import os
+          from pathlib import Path
+          from utils.cli_dashboard import _infer_counts
+          from urllib.parse import quote_plus
 
-      - name: Log dashboard URL
-        run: |
-          OWNER="${{ github.repository_owner }}"
-          REPO="cli-test-automation-poc"
-          BRANCH="test-dashboard"
-          echo "::notice::Dashboard is published via GitHub Pages (test-dashboard setup)."
-          echo "Dashboard URL (project site): https://${OWNER}.github.io/${REPO}/"
-          echo "Dashboard URL (branch-specific path): https://${OWNER}.github.io/${REPO}/${BRANCH}/"
+          report = Path("reports/report.html")
+          if not report.is_file():
+              raise SystemExit("reports/report.html not found; cannot build dashboard summary.")
+
+          html = report.read_text(encoding="utf-8", errors="ignore")
+          counts = _infer_counts(html)
+
+          passed = counts.get("passed", 0)
+          failed = counts.get("failed", 0)
+          error = counts.get("error", 0)
+          skipped = counts.get("skipped", 0)
+          total = counts.get("total", 0)
+          raw_total = counts.get("raw_total", total)
+          summary_total = counts.get("summary_total", total)
+          inconsistent = counts.get("summary_inconsistent", False)
+
+          # Link to this run's GitHub Actions summary page in the app repo
+          repo = os.environ.get("GITHUB_REPOSITORY", "")
+          run_id = os.environ.get("GITHUB_RUN_ID", "")
+          dashboard_url = f"https://github.com/{quote_plus(repo)}/actions/runs/{run_id}" if repo and run_id else ""
+
+          lines = []
+          lines.append("### CLI test dashboard summary (test repo)")
+          lines.append("")
+          lines.append(f"- **Total tests**: {total}")
+          lines.append(f"- **Passed**: {passed}")
+          lines.append(f"- **Failed**: {failed}")
+          lines.append(f"- **Error**: {error}")
+          lines.append(f"- **Skipped**: {skipped}")
+          if inconsistent and summary_total != raw_total:
+              lines.append("")
+              lines.append(f"> ⚠️ Detected mismatch between pytest summary ({summary_total} tests) and HTML table count ({raw_total}). Showing pytest summary numbers above.")
+          if dashboard_url:
+              lines.append("")
+              lines.append(f"- **GitHub Actions dashboard (this run)**: {dashboard_url}")
+          lines.append("")
+          lines.append("_Rendered from `reports/report.html` in the test repo._")
+
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary_path:
+              with open(summary_path, "a", encoding="utf-8") as fh:
+                  fh.write("\n".join(lines) + "\n")
+          PY
