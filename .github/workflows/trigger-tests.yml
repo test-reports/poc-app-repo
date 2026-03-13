@@ -29,3 +29,4 @@ jobs:
       sender: ${{ github.actor }}
     secrets:
       repo_access_token: ${{ secrets.REPO_DISPATCH_TOKEN }}
+      rp_api_key: ${{ secrets.RP_API_KEY }}

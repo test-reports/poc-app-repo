@@ -6,10 +6,9 @@ Dummy repository for triggering workflows. On **push** or **pull_request** to `m
 
 1. **Target repo**: **cli-test-automation-poc** must exist and contain the reusable workflow `.github/workflows/run-tests-reusable.yml` on its default branch (e.g. `main`).
 
-2. **Secret in this repo**: Add **`REPO_DISPATCH_TOKEN`** (exact name):
-   - **Settings → Secrets and variables → Actions → New repository secret**
-   - Name: `REPO_DISPATCH_TOKEN`
-   - Value: a PAT with `repo` scope (or fine-grained read access to **cli-test-automation-poc**). Used so the called workflow can checkout the test repo.
+2. **Secrets in this repo**:
+   - **`REPO_DISPATCH_TOKEN`**: PAT with read access to **cli-test-automation-poc** (for checkout in the called workflow).
+   - **`RP_API_KEY`** (optional): Report Portal API key. When set, the called workflow runs pytest with `--reportportal` so results are sent to Report Portal.
 
 3. **Allow reuse (if cli-test-automation-poc is private)**  
    In **cli-test-automation-poc**: **Settings → Actions → General → “Access”** → allow access from this repository (or from repositories in your org).
@@ -18,8 +17,8 @@ Dummy repository for triggering workflows. On **push** or **pull_request** to `m
 
 | Item | Where | Notes |
 |------|--------|--------|
-| Secret name | This repo → Settings → Actions → Secrets | Must be exactly `REPO_DISPATCH_TOKEN` |
-| Token scope | PAT used for the secret | Read access to **cli-test-automation-poc** (for checkout in called workflow). |
+| REPO_DISPATCH_TOKEN | This repo → Settings → Actions → Secrets | Read access to **cli-test-automation-poc** (for checkout). |
+| RP_API_KEY (optional) | This repo → Settings → Actions → Secrets | Report Portal API key; when set, tests report to RP. |
 | Reusable workflow | **cli-test-automation-poc** | `run-tests-reusable.yml` on default branch |
 | Access (private test repo) | **cli-test-automation-poc** → Settings → Actions | Allow this repo to use its workflows |
 
