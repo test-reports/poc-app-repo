@@ -83,7 +83,7 @@ jobs:
             --junit-path reports/junit.xml \
             --output-dir dashboard
 
-      - name: Push dashboard to test-dashboard branch (test repo)
+      - name: Push dashboard to test-dashboard branch (test repo, smoke suite)
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.repo_access_token }}
@@ -102,7 +102,8 @@ jobs:
             git worktree add -B "${DASHBOARD_BRANCH}" "${WORKTREE_DIR}"
           fi
 
-          rsync -a --delete --exclude='.git' dashboard/ "${WORKTREE_DIR}/"
+          mkdir -p "${WORKTREE_DIR}/smoke"
+          rsync -a --delete --exclude='.git' dashboard/ "${WORKTREE_DIR}/smoke/"
 
           cd "${WORKTREE_DIR}"
           git add .
@@ -135,9 +136,9 @@ jobs:
           summary_total = counts.get("summary_total", total)
           inconsistent = counts.get("summary_inconsistent", False)
 
-          # GitHub Pages dashboard URL for the CLI test repo (project site)
+          # GitHub Pages dashboard URL for the CLI test repo (project site), smoke suite folder
           owner = os.environ.get("GITHUB_REPOSITORY_OWNER") or (os.environ.get("GITHUB_REPOSITORY", "").split("/")[0] if os.environ.get("GITHUB_REPOSITORY") else "")
-          pages_url = f"https://{owner}.github.io/cli-test-automation-poc/" if owner else ""
+          pages_url = f"https://{owner}.github.io/cli-test-automation-poc/smoke/" if owner else ""
 
           lines = []
           lines.append("### CLI test dashboard summary (smoke, from app repo)")
