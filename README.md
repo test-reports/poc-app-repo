@@ -1,6 +1,6 @@
 # POC App Repo
 
-Dummy repository for triggering workflows. On **push** or **pull_request** to `main`/`master`, this repo **calls a reusable workflow** in **cli-test-automation-poc**. The full run (including tests) appears in **this repo’s Actions** tab so you don’t switch repos.
+Dummy repository for triggering workflows. On **push** or **pull_request** to `main`/`master`, this repo **calls a reusable workflow** in **cli-test-automation-poc**. The full run (including tests) appears in **this repo’s Actions** tab so you don’t switch repos. test
 
 ## Setup
 
