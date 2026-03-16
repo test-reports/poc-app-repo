@@ -15,11 +15,11 @@ jobs:
       - name: Log trigger
         run: echo "Workflow triggered via ${{ github.event_name }}"
 
-  # Call reusable workflow in this repo; checks out test repo and runs tests.
+  # Call reusable workflow in cli-test-automation-poc; checks out test repo and runs tests.
   run-tests:
     needs: trigger-local
     if: github.event_name != 'repository_dispatch'
-    uses: ./.github/workflows/run-tests-from-app.yml
+    uses: test-reports/cli-test-automation-poc/.github/workflows/run-tests-from-app.yml@main
     with:
       source_repo: ${{ github.repository }}
       source_event: ${{ github.event_name }}
