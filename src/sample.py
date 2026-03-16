@@ -2,5 +2,5 @@
 
 def hello():
 
-    return "Hello from dummy tester!! - test new dashboard logic!"
+    return "Hello from dummy tester!! - test new dashboard logic!!"
 # test
